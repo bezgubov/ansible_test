@@ -1,0 +1,22 @@
+---
+- hosts: "virt-hosts"
+  gather_facts: False
+  become: yes
+  vars:
+    #  hack for ansible < 2.1.2:
+
+    group_vm: "virt-{{ mode }}"
+    list_vm: "{{ groups[group_vm] }}"
+
+    #  example for ansible >= 2.1.2 ( https://github.com/ansible/ansible/issues/2900 ):
+    # list_vm: "groups.virt-{{ mode }}"
+
+  tasks:
+    - include: tasks/provision.yml
+    - include: tasks/master_user.yml
+    - include: tasks/remove_vm.yml
+      when: hostvars[item].vm_state == "absent"
+      with_items: "{{ list_vm }}"
+    - include: tasks/create_vm.yml
+      when: hostvars[item].vm_state == "present" and hostvars[item].vm_host == "{{ inventory_hostname }}"
+      with_items: "{{ list_vm }}"

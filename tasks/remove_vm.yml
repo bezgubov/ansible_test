@@ -1,0 +1,27 @@
+---
+- virt: 
+    command: "list_vms"
+    uri: "qemu:///system"
+  register: list
+
+- virt:
+    name: "{{ item }}"
+    state: destroyed
+  when: item in list.list_vms
+
+- virt:
+    name: "{{ item }}"
+    command: "undefine"
+  when: item in list.list_vms
+
+- lvol:
+    vg="{{ lvm }}"
+    lv="{{ item }}-root"
+    force=yes
+    state=absent
+
+- lvol:
+    vg="{{ lvm }}"
+    lv="{{ item }}-swap"
+    force=yes
+    state=absent

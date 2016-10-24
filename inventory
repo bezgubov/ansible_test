@@ -1,0 +1,25 @@
+[www]
+web-server-01             ansible_ssh_host=web-server-01.test.ru
+
+[virt-hosts]
+host-system-01             ansible_ssh_host=host-system-01.test.ru lvm=lvm
+host-system-02             ansible_ssh_host=host-system-02.test.ru lvm=vg_on-raid
+
+[virt-all:children]
+virt-dev
+virt-stage
+virt-prod
+
+[virt-dev]
+admin-test2        ansible_ssh_host=admin-test2.test.ru        vm_state=absent  vm_host=blade2 vm_ip="10.0.0.172" vm_mac="00:16:3E:0E:17:2D" vm_ram="4096" vm_disk="20G"  vm_swap="4G"  os_variant="ubuntu16.04"   os_name="xenial"
+gitlab-test        ansible_ssh_host=gitlab-test.test.ru        vm_state=absent  vm_host=blade6 vm_ip="10.0.0.244" vm_mac="00:16:3E:60:24:46" vm_ram="2048" vm_disk="50G"  vm_swap="4G"  os_variant="ubuntu16.04"   os_name="xenial"
+mongo-dump-test-01 ansible_ssh_host=mongo-dump-test-01.test.ru vm_state=present vm_host=blade2 vm_ip="10.0.0.127" vm_mac="00:16:3E:0E:12:7D" vm_ram="1024" vm_disk="200G" vm_swap="4G"  os_variant="ubuntu16.04"   os_name="xenial"
+mongo-dump-test-02 ansible_ssh_host=mongo-dump-test-02.test.ru vm_state=present vm_host=blade2 vm_ip="10.0.0.128" vm_mac="00:16:3E:0E:12:8D" vm_ram="1024" vm_disk="200G" vm_swap="4G"  os_variant="ubuntu16.04"   os_name="xenial"
+mongo-dump-test-03 ansible_ssh_host=mongo-dump-test-03.test.ru vm_state=present vm_host=blade6 vm_ip="10.0.0.129" vm_mac="00:16:3E:0E:12:9D" vm_ram="1024" vm_disk="200G" vm_swap="4G"  os_variant="ubuntu16.04"   os_name="xenial"
+
+[virt-stage]
+mongo-test-arbiter ansible_ssh_host=mongo-test-arbiter.test.ru vm_state=present vm_host=blade6 vm_ip="10.0.0.133" vm_mac="00:16:3E:0E:13:3A" vm_ram="512"  vm_disk="20G"  vm_swap="4G"  os_variant="ubuntu16.04"   os_name="xenial"
+
+[virt-prod]
+samba              ansible_ssh_host=samba.test.ru              vm_state=present vm_host=blade6 vm_ip="10.0.0.8"   vm_mac="00:16:3e:0c:81:2c" vm_ram="512"  vm_disk="100G" vm_swap="4G"  os_variant="ubuntu16.04"   os_name="xenial"
+redis01            absible_ssh_host=redis01.test.ru            vm_state=present vm_host=blade6 vm_ip="10.0.0.71"  vm_mac="00:16:3e:0c:71:2c" vm_ram="8192" vm_disk="100G" vm_swap="10G" os_variant="ubuntu16.04"   os_name="xenial"

@@ -1,0 +1,57 @@
+---
+- virt: 
+    command: "list_vms"
+    uri: "qemu:///system"
+  register: list
+
+- lvol:
+    vg="{{ lvm }}"
+    lv="{{ item }}-root"
+    size="{{ hostvars[item].vm_disk }}"
+  when: item not in list.list_vms
+
+- lvol:
+    vg="{{ lvm }}"
+    lv="{{ item }}-swap"
+    size="{{ hostvars[item].vm_swap }}"
+  when: item not in list.list_vms
+
+- shell: "mkswap /dev/{{ lvm }}/{{ item }}-swap"
+  when: item not in list.list_vms
+
+- lineinfile:
+    dest: "/var/www/ks/ks.cfg"
+    regexp: "^network.*$"
+    line: "network --device=eth0 --bootproto=static --ip={{ hostvars[item].vm_ip }} --netmask=255.255.255.0 --nameserver=10.0.0.251 --gateway=10.0.0.12 --noipv6"
+  delegate_to: "web-server-01"
+  when: item not in list.list_vms
+
+- command: virt-install --name="{{ item }}"
+                        --arch=x86_64
+                        --vcpus=8
+                        --ram="{{ hostvars[item].vm_ram }}"
+                        --disk path=/dev/{{ lvm }}/{{ item }}-root,device=disk,bus=virtio
+                        --bridge=br0
+                        --mac="{{ hostvars[item].vm_mac }}"
+                        --os-type=linux
+                        --os-variant="{{ hostvars[item].os_variant }}"
+                        --location="http://ru.archive.ubuntu.com/ubuntu/dists/{{ hostvars[item].os_name }}/main/installer-amd64/"
+                        --graphics none
+                        --console pty,target_type=serial
+                        --extra-args="ks=http://web-server-01.test.ru/ks/ks.cfg
+                                      ksdevice=eth0
+                                      ip="{{ hostvars[item].vm_ip }}"
+                                      netmask=255.255.255.0
+                                      dns=10.0.0.251
+                                      gateway=10.0.0.12
+                                      console=ttyS0,115200n8 serial"
+                        --noautoconsole
+  when: item not in list.list_vms
+
+- virt:
+    name: "{{ item }}"
+    command: autostart
+
+- virt:
+    name: "{{ item }}"
+    state: running

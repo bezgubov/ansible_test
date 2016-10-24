@@ -1,0 +1,18 @@
+---
+- lineinfile: "dest=/etc/sudoers state=present line='%sudo ALL=(ALL) NOPASSWD: ALL'"
+
+- user: name=virtmaster groups=sudo
+
+- file:
+    path="/home/virtmaster/.ssh"
+    owner=virtmaster
+    state=directory
+    mode=0700
+
+- copy:
+   src="ssh-keys/id_rsa"
+   dest="/home/virtmaster/.ssh/id_rsa"
+   owner=virtmaster
+   mode=0600
+
+- authorized_key: user=virtmaster key="{{ lookup('file', 'ssh-keys/id_rsa.pub') }}"
